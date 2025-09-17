@@ -1,0 +1,10 @@
+Frame 153, BBox (np.float64(379.64080810546875), np.float64(159.90048217773438), np.float64(607.0186767578125), np.float64(335.7268371582031)):
+**Fall Monitoring Report**
+
+**Timestamp:** 5.1 seconds
+**Frame ID:** 153
+**Bounding Box:** (379.64, 159.90, 607.02, 335.73)
+**Posture:** Falling
+**Hazards/Context:** The person fell near an office desk; no immediately visible sharp objects.  
+**Alert/Notes:**  Fall detected. Assess the individual for injuries and provide necessary assistance.
+
