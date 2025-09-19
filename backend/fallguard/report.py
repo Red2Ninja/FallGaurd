@@ -20,6 +20,7 @@ def describe_fall_frames(fall_frames, fps=30):
         frame_id = info["frame_id"]
         bbox = info["bbox"]
         pose = info["pose"]
+        name = info.get("name", "Unknown") 
 
         timestamp = round(frame_id / fps, 2)  # approximate timestamp
 
@@ -29,14 +30,14 @@ You are an AI assistant for fall monitoring in videos.
 Attached is an image of a person, with detected pose keypoints: {pose}
 
 Create a short report with the following:
+- Person's name: {name}
 - Approximate timestamp: {timestamp} seconds
-- Frame ID: {frame_id}
-- Bounding box coordinates: {bbox}
+- Severity of the fall
 - Person's posture: falling, lying, sitting, or standing
-- Any visible hazards or surrounding context
+- Any visible hazards or describe surrounding context
 - Recommended alert or safety notes (if necessary)
 
-Keep it concise, 2-3 sentences max, in structured format.
+Keep it concise, 2-3 sentences max, in structured format, do not use bold keep it email text message appropriate.
         """
 
         try:
@@ -48,7 +49,8 @@ Keep it concise, 2-3 sentences max, in structured format.
         report.append({
             "frame_id": frame_id,
             "bbox": bbox,
-            "description": description
+            "description": description,
+            "name": name
         })
 
     # Save the report
@@ -59,7 +61,7 @@ Keep it concise, 2-3 sentences max, in structured format.
 
     with open(report_file, "w") as f:
         for entry in report:
-            f.write(f"Frame {entry['frame_id']}, BBox {entry['bbox']}:\n{entry['description']}\n\n")
+            f.write(f"\n{entry['description']}\n\n")
 
     print(" Fall report saved as fall_report.txt")
     return report_file

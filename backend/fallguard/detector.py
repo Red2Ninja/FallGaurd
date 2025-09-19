@@ -5,6 +5,9 @@ import torch
 import math
 import numpy as np
 from torchvision import transforms
+import pickle
+import face_recognition
+
 
 from yolov7.utils.general import non_max_suppression_kpt
 from yolov7.utils.plots import output_to_keypoint, plot_skeleton_kpts
@@ -26,7 +29,12 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "yolov7"))
 
 
+ENCODINGS_FILE = "fallguard/data/encodings.pickle"
+with open(ENCODINGS_FILE, "rb") as f:
+    data = pickle.load(f)
 
+known_encodings = data["encodings"]
+known_names = data["names"]
 
 # Allow YOLO Model class in pickle
 torch.serialization.add_safe_globals([Model])
@@ -117,26 +125,47 @@ def fall_detection(poses):
 # Process Video Function
 
 def process_video(video_path, to_emails):
+    cap = cv2.VideoCapture(video_path)
+
     model, device = get_pose_model()
-    vid_cap = cv2.VideoCapture(video_path)
-    if not vid_cap.isOpened():
+    #vid_cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
         raise Exception("Video not found: " + video_path)
 
-    width = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     output_video = os.path.join("uploads", "processed.mp4")
     vid_out = cv2.VideoWriter(output_video, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
 
     fall_frames = []
     frame_id = 0
-    success, frame = vid_cap.read()
+    success, frame = cap.read()
 
     while success:
         frame_id += 1
 
+        # --- FACE RECOGNITION ---
+        rgb_small = cv2.cvtColor(cv2.resize(frame, (0, 0), fx=0.5, fy=0.5), cv2.COLOR_BGR2RGB)
+        face_locations = face_recognition.face_locations(rgb_small, model="hog")
+        face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
+
+        face_names = []
+        for face_encoding in face_encodings:
+            matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.45)
+            name = "Unknown"
+            if True in matches:
+                matched_idxs = [i for i, b in enumerate(matches) if b]
+                counts = {}
+                for i in matched_idxs:
+                    matched_name = known_names[i]
+                    counts[matched_name] = counts.get(matched_name, 0) + 1
+                name = max(counts, key=counts.get)
+            face_names.append(name)
+
+
         if frame_id % 10 != 0:
             vid_out.write(frame)  # still write original frame to keep smooth video
-            success, frame = vid_cap.read()
+            success, frame = cap.read()
             continue
 
         image = letterbox(frame, 960, stride=64, auto=True)[0]
@@ -153,12 +182,17 @@ def process_video(video_path, to_emails):
             if frame_id == 1 and len(output) > 0:
                 print("Pose output sample:", output[0])
 
-
+        #FALL DETECTION
         is_fall, bbox = fall_detection(output)
         if is_fall:
+                    is_fall, bbox = fall_detection(output)
+        if is_fall:
+            person_name = face_names[0] if face_names else "Unknown"
+
             x_min, y_min, x_max, y_max = bbox
             cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0,0,255), 3)
-            cv2.putText(frame, "Fall Detected", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+            cv2.putText(frame, f"Fall Detected ({person_name})", (50,50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
             snapshot_file = os.path.join("uploads", f"fall_snapshot_{frame_id}.jpg")
             cv2.imwrite(snapshot_file, frame)
@@ -167,28 +201,27 @@ def process_video(video_path, to_emails):
                 "frame_id": frame_id,
                 "bbox": bbox,
                 "snapshot_path": snapshot_file,
-                "pose": output
+                "pose": output,
+                "name": person_name
             })
+        success, frame = cap.read()
 
-        vid_out.write(frame)
-        success, frame = vid_cap.read()
 
     vid_out.release()
-    vid_cap.release()
+    cap.release()
 
     if fall_frames:
+            
         middle_index = len(fall_frames) // 2
+        selected_frame = fall_frames[middle_index]
 
-        # Save AI report to file
-        
-        report_file = describe_fall_frames([fall_frames[middle_index]])
+        report_file = describe_fall_frames([selected_frame])
 
-        with open(report_file, "r") as f:
-            report_text = f.read()
+        send_fall_alert_email(
+            to_emails, report_file, selected_frame["snapshot_path"], name=selected_frame["name"]
+        )
 
+        return output_video, report_file, selected_frame["snapshot_path"]
 
-        send_fall_alert_email(to_emails, report_file, fall_frames[middle_index]["snapshot_path"])
-
-        return output_video, report_file, fall_frames[middle_index]["snapshot_path"]
 
     return None, None, None

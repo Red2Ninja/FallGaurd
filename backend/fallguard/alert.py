@@ -4,7 +4,7 @@ import ssl
 from config import SENDER_EMAIL, APP_PASSWORD
 from email.message import EmailMessage
 
-def send_fall_alert_email(to_emails, report_file, snapshot_file):
+def send_fall_alert_email(to_emails, report_file, snapshot_file,name=None):
     sender_email = SENDER_EMAIL
     app_password = APP_PASSWORD  # Google App Password
     
