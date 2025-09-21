@@ -28,8 +28,10 @@ from fallguard.alert import send_fall_alert_email
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "yolov7"))
 
+import json
 
 ENCODINGS_FILE = "fallguard/data/encodings.pickle"
+USER_DB_FILE = "fallguard/data/users.json"
 with open(ENCODINGS_FILE, "rb") as f:
     data = pickle.load(f)
 

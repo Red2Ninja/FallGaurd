@@ -1,0 +1,170 @@
+.patient-records-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: white;
+  padding: 1rem;
+  background-color: #1f2937; /* gray-800 */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-filter {
+  display: flex;
+  gap: 1rem;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  background-color: #374151;
+  color: white;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af; /* gray-400 */
+  width: 1rem;
+  height: 1rem;
+}
+
+select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  background-color: #374151;
+  color: white;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #374151;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+thead th {
+  background-color: #111827; /* gray-900 */
+  color: #9ca3af;
+}
+
+tbody tr {
+  border-bottom: 1px solid #374151;
+}
+
+tbody tr:hover {
+  background-color: #1f2937; /* gray-750 */
+}
+
+.id-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: #4b5563;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.risk-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.risk-bar {
+  width: 2rem;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.risk-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.green-gradient {
+  background: linear-gradient(to right, #22c55e, #06b6d4);
+}
+
+.yellow-red-gradient {
+  background: linear-gradient(to right, #facc15, #ef4444);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  color: white;
+}
+
+.action-btn.green { background-color: #22c55e; }
+.action-btn.yellow { background-color: #facc15; }
+.action-btn.red { background-color: #ef4444; }
+.action-btn.redDark { background-color: #b91c1c; }
+.action-btn.blue { background-color: #3b82f6; }
+.action-btn.blueDark { background-color: #1e40af; }
+.action-btn.yellowDark { background-color: #ca8a04; }
+
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.card h3 {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+}
+
+.card p {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.card.high-risk p { color: #ef4444; }
+.card.medium-risk p { color: #facc15; }
+.card.stable p { color: #22c55e; }

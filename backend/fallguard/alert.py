@@ -4,9 +4,13 @@ import ssl
 from config import SENDER_EMAIL, APP_PASSWORD
 from email.message import EmailMessage
 
-def send_fall_alert_email(to_emails, report_file, snapshot_file,name=None):
+def send_fall_alert_email(to_emails, report_file, snapshot_file, user_info=None):
     sender_email = SENDER_EMAIL
     app_password = APP_PASSWORD  # Google App Password
+
+    name = user_info.get("name", "Unknown") if user_info else "Unknown"
+    guardian_name = user_info.get("guardian_name", "N/A") if user_info else "N/A"
+    guardian_email = user_info.get("guardian_email", "N/A") if user_info else "N/A"
     
     # Read report
     with open(report_file, "r") as f:

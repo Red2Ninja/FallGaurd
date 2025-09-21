@@ -1,0 +1,239 @@
+/* EmployeeRecords.css */
+.employee-records-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  background-color: #1f2937;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.header p {
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-filter {
+  display: flex;
+  gap: 1rem;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box .icon {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: #9ca3af;
+}
+
+.search-box input {
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  background-color: #111827;
+  color: #fff;
+  outline: none;
+}
+
+.add-employee-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(to right, #22d3ee, #3b82f6);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #374151;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #374151;
+  font-size: 0.875rem;
+}
+
+th {
+  color: #9ca3af;
+}
+
+/* Cells */
+.id-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #22d3ee;
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #4b5563, #6b7280);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Shift toggle */
+.shift-toggle {
+  width: 3rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #4b5563;
+  position: relative;
+  transition: background-color 0.3s;
+}
+
+.shift-toggle.active {
+  background-color: #22c55e;
+}
+
+.toggle-dot {
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  transition: transform 0.3s;
+}
+
+.shift-toggle.active .toggle-dot {
+  transform: translateX(1.5rem);
+}
+
+.text-green { color: #22c55e; }
+.text-gray { color: #9ca3af; }
+
+/* Action buttons */
+.action-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.action-btn.green { background-color: #22c55e; }
+.action-btn.cyan { background-color: #06b6d4; }
+.action-btn.red { background-color: #ef4444; }
+.action-btn.gray { background-color: #6b7280; }
+.action-btn.blue { background-color: #3b82f6; }
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stats-card {
+  background-color: #111827;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #374151;
+}
+
+.stats-card h3 {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.stats-counts {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Quick Actions */
+.quick-actions {
+  background-color: #111827;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid #374151;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.quick-btn.blue { background-color: #3b82f6; }
+.quick-btn.blue:hover { background-color: #2563eb; }
+
+.quick-btn.green { background-color: #22c55e; }
+.quick-btn.green:hover { background-color: #16a34a; }
+
+.quick-btn.purple { background-color: #8b5cf6; }
+.quick-btn.purple:hover { background-color: #7c3aed; }
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+}
