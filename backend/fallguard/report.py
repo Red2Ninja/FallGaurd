@@ -8,8 +8,9 @@ from config import GEMINI_API_KEY
 # Configure your API key
 genai.configure(api_key=GEMINI_API_KEY)
 
-USERS_FILE = "users.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+USERS_FILE = os.path.join(BASE_DIR, "data", "users.json")
 def get_user_info(patient_id):
     """Fetch user details from users.json using patient_id"""
     try:

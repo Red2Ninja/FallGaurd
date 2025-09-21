@@ -9,6 +9,7 @@ import os
 from fallguard.detector import process_video
 from fallguard.utils import capture_webcam_video
 from fallguard.enroll import enroll_new_user
+from fallguard.enroll import start_patient_enrollment
 
 app = FastAPI(title="FallGuard API")
 
@@ -187,18 +188,21 @@ async def register_face(
         medical_history=medical_history
     )'''
 
-    from fallguard.enroll import start_patient_enrollment
+  
 
-    # Example usage inside a route or function
+
+    # Start enrollment using the data submitted by the user
     start_patient_enrollment(
-        patient_id="P001",
-        name="John Doe",
-        age=75,
-        guardian_name="Jane Doe",
-        guardian_phone="1234567890",
-        guardian_email="jane@example.com",
-        medical_history="Diabetes, Hypertension"
+        patient_id=patient_id,
+        name=name,
+        age=age,
+        guardian_name=guardian_name,
+        guardian_phone=guardian_phone,
+        guardian_email=guardian_email,
+        medical_history=medical_history
     )
+
+    return {"message": f"✅ User '{name}' registered successfully!"}
 
 
     return {"message": f"✅ User '{name}' registered successfully with {len(image_paths)} images."}

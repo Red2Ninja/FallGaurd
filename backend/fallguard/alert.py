@@ -1,10 +1,14 @@
 import smtplib
 import ssl
 import json
+import os
 from config import SENDER_EMAIL, APP_PASSWORD
 from email.message import EmailMessage
 
-USERS_FILE = "users.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+USERS_FILE = os.path.join(BASE_DIR, "data", "users.json")
+
 DEFAULT_EMAIL = "smoothh.operatorr55@gmail.com"
 
 def get_user_emails():

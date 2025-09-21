@@ -29,9 +29,9 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "yolov7"))
 
 import json
-
-ENCODINGS_FILE = "fallguard/data/encodings.pickle"
-USER_FILE = "fallguard/data/users.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ENCODINGS_FILE = os.path.join(BASE_DIR, "data", "encodings.pickle")
+USER_FILE = os.path.join(BASE_DIR, "data", "users.json")
 
 if not os.path.exists(ENCODINGS_FILE) or os.path.getsize(ENCODINGS_FILE) == 0:
     os.makedirs(os.path.dirname(ENCODINGS_FILE), exist_ok=True)
@@ -54,13 +54,15 @@ known_names = data.get("names", [])
 if not os.path.exists(USER_FILE) or os.path.getsize(USER_FILE) == 0:
     os.makedirs(os.path.dirname(USER_FILE), exist_ok=True)
     with open(USER_FILE, "w") as f:
-        json.dump([], f, indent=4)
+        json.dump({}, f, indent=4)   # empty dict, not list
 
 with open(USER_FILE, "r") as f:
     try:
         user_db = json.load(f)
+        if not isinstance(user_db, dict):
+            user_db = {}
     except json.JSONDecodeError:
-        user_db = []
+        user_db = {}
         with open(USER_FILE, "w") as fw:
             json.dump(user_db, fw, indent=4)
 
@@ -148,6 +150,31 @@ def fall_detection(poses):
     return False, None
 
 
+def reload_face_data():
+    global known_encodings, known_names, user_db
+    # encodings
+    try:
+        with open(ENCODINGS_FILE, "rb") as f:
+            d = pickle.load(f)
+    except Exception:
+        d = {"encodings": [], "names": []}
+    known_encodings = d.get("encodings", [])
+    known_names = d.get("names", [])
+
+    # users
+    try:
+        with open(USER_FILE, "r") as f:
+            ud = json.load(f)
+            user_db = ud if isinstance(ud, dict) else {}
+    except Exception:
+        user_db = {}
+
+
+
+
+
+
+
 
 
 # Process Video Function
@@ -169,11 +196,15 @@ def process_video(video_path, to_emails):
     frame_id = 0
     success, frame = cap.read()
 
+    # call it in process_video before loop:
+    reload_face_data()
+    print("Encodings:", len(known_encodings), "Known IDs:", known_names)
+
     while success:
         frame_id += 1
 
         # --- FACE RECOGNITION ---
-        rgb_small = cv2.cvtColor(cv2.resize(frame, (0, 0), fx=0.75, fy=0.75), cv2.COLOR_BGR2RGB)
+        '''rgb_small = cv2.cvtColor(cv2.resize(frame, (0, 0), fx=0.75, fy=0.75), cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_small, model="hog")
         face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
 
@@ -181,18 +212,67 @@ def process_video(video_path, to_emails):
         user_infos = []
         for face_encoding in face_encodings:
             matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.6)
-            name = "Unknown"
+            patient_id = "Unknown"
             user_info = {}
+
             if True in matches:
                 matched_idxs = [i for i, b in enumerate(matches) if b]
                 counts = {}
                 for i in matched_idxs:
-                    matched_name = known_names[i]
-                    counts[matched_name] = counts.get(matched_name, 0) + 1
-                name = max(counts, key=counts.get)
-                user_info = next((u for u in user_db if u["name"]==name), {})
-            face_names.append(name)
-            user_infos.append(user_info)
+                    matched_id = known_names[i]  # known_names stores patient_id
+                    counts[matched_id] = counts.get(matched_id, 0) + 1
+                patient_id = max(counts, key=counts.get)  # get most likely patient_id
+
+                # Lookup user info directly from dict
+                user_info = user_db.get(patient_id, {})
+                #print("Loaded user DB:", user_db.keys())
+
+
+            face_names.append(patient_id)
+            user_infos.append(user_info)'''
+        
+        # replace FACE RECOGNITION block with:
+        # --- FACE RECOGNITION ---
+        rgb_small = cv2.cvtColor(cv2.resize(frame, (0, 0), fx=0.75, fy=0.75), cv2.COLOR_BGR2RGB)
+        sh_small_h, sh_small_w = rgb_small.shape[:2]
+        sh_h, sh_w = frame.shape[:2]
+        scale_x = sh_w / sh_small_w
+        scale_y = sh_h / sh_small_h
+
+        face_locations = face_recognition.face_locations(rgb_small, model="hog")
+        face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
+
+        face_ids = []
+        face_bboxes = []  # mapped to original frame coordinates
+        user_infos = []
+
+        for face_loc, face_encoding in zip(face_locations, face_encodings):
+            # map face bbox to original frame
+            top, right, bottom, left = face_loc
+            left_o = int(left * scale_x); top_o = int(top * scale_y)
+            right_o = int(right * scale_x); bottom_o = int(bottom * scale_y)
+            face_bbox = (left_o, top_o, right_o, bottom_o)
+            face_bboxes.append(face_bbox)
+
+            if not known_encodings:
+                face_ids.append("Unknown")
+                user_infos.append({})
+                continue
+
+            matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.6)
+            if True in matches:
+                matched_idxs = [i for i, b in enumerate(matches) if b]
+                counts = {}
+                for i in matched_idxs:
+                    matched_id = known_names[i]
+                    counts[matched_id] = counts.get(matched_id, 0) + 1
+                patient_id = max(counts, key=counts.get)
+                face_ids.append(patient_id)
+                user_infos.append(user_db.get(patient_id, {}))
+            else:
+                face_ids.append("Unknown")
+                user_infos.append({})
+
 
 
         if frame_id % 10 != 0:
@@ -219,11 +299,12 @@ def process_video(video_path, to_emails):
         if is_fall:
                     is_fall, bbox = fall_detection(output)
         if is_fall:
-            person_name = face_names[0] if face_names else "Unknown"
+            patient_id = face_ids[0] if face_ids else "Unknown"
             user_info = user_infos[0] if user_infos else {}
+            display_name = user_info.get("name") or patient_id
             x_min, y_min, x_max, y_max = bbox
             cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0,0,255), 3)
-            cv2.putText(frame, f"Fall Detected ({person_name})", (50,50),
+            cv2.putText(frame, f"Fall Detected ({display_name})", (50,50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
             snapshot_file = os.path.join("uploads", f"fall_snapshot_{frame_id}.jpg")
@@ -234,7 +315,7 @@ def process_video(video_path, to_emails):
                 "bbox": bbox,
                 "snapshot_path": snapshot_file,
                 "pose": output,
-                "name": person_name,
+                "name": display_name,
                 "user_info": user_info
             })
         vid_out.write(frame)
@@ -259,3 +340,15 @@ def process_video(video_path, to_emails):
 
 
     return None, None, None
+
+
+def iou(boxA, boxB):
+    xA = max(boxA[0], boxB[0]); yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2]); yB = min(boxA[3], boxB[3])
+    interW = max(0, xB - xA); interH = max(0, yB - yA)
+    interArea = interW * interH
+    if interArea == 0: 
+        return 0.0
+    boxAArea = max(1,(boxA[2]-boxA[0])) * max(1,(boxA[3]-boxA[1]))
+    boxBArea = max(1,(boxB[2]-boxB[0])) * max(1,(boxB[3]-boxB[1]))
+    return interArea / float(boxAArea + boxBArea - interArea)
