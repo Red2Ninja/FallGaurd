@@ -4,21 +4,42 @@ import pickle
 import json
 import cv2
 import face_recognition
+import json
 from datetime import datetime
 
 ENCODINGS_FILE = "fallguard/data/encodings.pickle"
 USER_DB_FILE = "fallguard/data/users.json"
 
-def load_encodings():
-    if os.path.exists(ENCODINGS_FILE):
-        with open(ENCODINGS_FILE, "rb") as f:
-            return pickle.load(f)
-    return {"encodings": [], "names": []}
+os.makedirs(os.path.dirname(ENCODINGS_FILE), exist_ok=True)
 
-def save_encodings(data):
+empty_data = {"encodings": [], "names": []}
+
+with open(ENCODINGS_FILE, "wb") as f:
+    pickle.dump(empty_data, f)
+
+def load_encodings():
+    os.makedirs(os.path.dirname(ENCODINGS_FILE), exist_ok=True)
+
+    if not os.path.exists(ENCODINGS_FILE) or os.path.getsize(ENCODINGS_FILE) == 0:
+        empty_data = {"encodings": [], "names": []}
+        with open(ENCODINGS_FILE, "wb") as f:
+            pickle.dump(empty_data, f)
+        return empty_data
+
+    with open(ENCODINGS_FILE, "rb") as f:
+        try:
+            return pickle.load(f)
+        except (EOFError, pickle.UnpicklingError):
+            # If file is corrupt or empty, reset
+            empty_data = {"encodings": [], "names": []}
+            with open(ENCODINGS_FILE, "wb") as fw:
+                pickle.dump(empty_data, fw)
+            return empty_data
+
+def save_encodings(encodings):
     os.makedirs(os.path.dirname(ENCODINGS_FILE), exist_ok=True)
     with open(ENCODINGS_FILE, "wb") as f:
-        pickle.dump(data, f)
+        pickle.dump(encodings, f)
 
 def load_user_db():
     if os.path.exists(USER_DB_FILE):
@@ -67,7 +88,11 @@ def enroll_new_user(images, name, guardian_name, guardian_phone, guardian_email,
         "images": images,
         "added_on": str(datetime.now())
     }
-    user_db.append(user_entry)
+    
+    user_db[user_entry['name']] = user_entry
+    with open(USER_DB_FILE, "w") as f:
+        json.dump(user_db, f, indent=4)
+
     save_user_db(user_db)
 
     print(f"✅ User {name} enrolled successfully with {len(new_encodings)} face(s).")

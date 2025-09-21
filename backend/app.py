@@ -7,6 +7,7 @@ import shutil
 import os
 from fallguard.detector import process_video
 from fallguard.utils import capture_webcam_video
+from fallguard.enroll import enroll_new_user
 
 app = FastAPI(title="FallGuard API")
 
@@ -143,3 +144,38 @@ async def download_file(file_name: str):
 @app.get("/")
 async def root():
     return {"message": "Welcome to FallGuard Backend!"}
+
+
+@app.post("/register-face/")
+async def register_face(
+    name: str = Form(...),
+    guardian_name: str = Form(...),
+    guardian_phone: str = Form(...),
+    guardian_email: str = Form(...),
+    medical_history: str = Form(...),
+    images: list[UploadFile] = File(...)
+):
+    """
+    Register a new user with face images and guardian details.
+    Updates encodings.pickle and users.json incrementally.
+    """
+
+    # Save uploaded face images
+    image_paths = []
+    for img in images:
+        save_path = os.path.join(UPLOAD_FOLDER, img.filename)
+        with open(save_path, "wb") as f:
+            shutil.copyfileobj(img.file, f)
+        image_paths.append(save_path)
+
+    # Call the enrollment logic
+    enroll_new_user(
+        images=image_paths,
+        name=name,
+        guardian_name=guardian_name,
+        guardian_phone=guardian_phone,
+        guardian_email=guardian_email,
+        medical_history=medical_history
+    )
+
+    return {"message": f"✅ User '{name}' registered successfully with {len(image_paths)} images."}

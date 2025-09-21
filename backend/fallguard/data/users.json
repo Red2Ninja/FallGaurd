@@ -1,0 +1,13 @@
+{
+    "Aarya": {
+        "name": "Aarya",
+        "guardian_name": "Anagha",
+        "guardian_phone": "9372520121",
+        "guardian_email": "aryaanagvekar@gmail.com",
+        "medical_history": "low blood pressure",
+        "images": [
+            "uploads\\pass_photo.jpg"
+        ],
+        "added_on": "2025-09-21 22:32:23.386169"
+    }
+}

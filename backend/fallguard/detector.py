@@ -32,11 +32,37 @@ import json
 
 ENCODINGS_FILE = "fallguard/data/encodings.pickle"
 USER_DB_FILE = "fallguard/data/users.json"
-with open(ENCODINGS_FILE, "rb") as f:
-    data = pickle.load(f)
 
-known_encodings = data["encodings"]
-known_names = data["names"]
+if not os.path.exists(ENCODINGS_FILE) or os.path.getsize(ENCODINGS_FILE) == 0:
+    os.makedirs(os.path.dirname(ENCODINGS_FILE), exist_ok=True)
+    with open(ENCODINGS_FILE, "wb") as f:
+        pickle.dump({"encodings": [], "names": []}, f)
+
+with open(ENCODINGS_FILE, "rb") as f:
+    try:
+        data = pickle.load(f)
+    except (EOFError, pickle.UnpicklingError):
+        # If file is corrupt, reinitialize
+        data = {"encodings": [], "names": []}
+        with open(ENCODINGS_FILE, "wb") as fw:
+            pickle.dump(data, fw)
+
+known_encodings = data.get("encodings", [])
+known_names = data.get("names", [])
+
+# Load user database
+if not os.path.exists(USER_DB_FILE) or os.path.getsize(USER_DB_FILE) == 0:
+    os.makedirs(os.path.dirname(USER_DB_FILE), exist_ok=True)
+    with open(USER_DB_FILE, "w") as f:
+        json.dump([], f, indent=4)
+
+with open(USER_DB_FILE, "r") as f:
+    try:
+        user_db = json.load(f)
+    except json.JSONDecodeError:
+        user_db = []
+        with open(USER_DB_FILE, "w") as fw:
+            json.dump(user_db, fw, indent=4)
 
 # Allow YOLO Model class in pickle
 torch.serialization.add_safe_globals([Model])
@@ -152,9 +178,11 @@ def process_video(video_path, to_emails):
         face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
 
         face_names = []
+        user_infos = []
         for face_encoding in face_encodings:
             matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.45)
             name = "Unknown"
+            user_info = {}
             if True in matches:
                 matched_idxs = [i for i, b in enumerate(matches) if b]
                 counts = {}
@@ -162,7 +190,9 @@ def process_video(video_path, to_emails):
                     matched_name = known_names[i]
                     counts[matched_name] = counts.get(matched_name, 0) + 1
                 name = max(counts, key=counts.get)
+                user_info = next((u for u in user_db if u["name"]==name), {})
             face_names.append(name)
+            user_infos.append(user_info)
 
 
         if frame_id % 10 != 0:
@@ -190,7 +220,7 @@ def process_video(video_path, to_emails):
                     is_fall, bbox = fall_detection(output)
         if is_fall:
             person_name = face_names[0] if face_names else "Unknown"
-
+            user_info = user_infos[0] if user_infos else {}
             x_min, y_min, x_max, y_max = bbox
             cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0,0,255), 3)
             cv2.putText(frame, f"Fall Detected ({person_name})", (50,50),
@@ -204,8 +234,10 @@ def process_video(video_path, to_emails):
                 "bbox": bbox,
                 "snapshot_path": snapshot_file,
                 "pose": output,
-                "name": person_name
+                "name": person_name,
+                "user_info": user_info
             })
+        vid_out.write(frame)
         success, frame = cap.read()
 
 
@@ -220,7 +252,7 @@ def process_video(video_path, to_emails):
         report_file = describe_fall_frames([selected_frame])
 
         send_fall_alert_email(
-            to_emails, report_file, selected_frame["snapshot_path"], name=selected_frame["name"]
+            to_emails, report_file, selected_frame["snapshot_path"], selected_frame.get("user_info")
         )
 
         return output_video, report_file, selected_frame["snapshot_path"]
