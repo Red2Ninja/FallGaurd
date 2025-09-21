@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import './PatientRegistration.css';
+import axios from 'axios';
+
 const PatientRegistration = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
-    guardianEmail: '',
-    medicalHistory: '',
     age: '',
-    room: '',
+    guardianName: '',
+    guardianEmail: '',
+    guardianPhone: '',
+    medicalHistory: '',
+    images: []
   });
 
   const handleChange = (e) => {
@@ -14,17 +18,45 @@ const PatientRegistration = ({ onSubmit }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, images: Array.from(e.target.files) });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Basic validation
-    if (!formData.name || !formData.guardianEmail || !formData.age) {
-      alert('Please fill in all required fields.');
-      return;
+    if (!formData.name || !formData.guardianEmail || !formData.age) return alert('Fill required fields');
+
+    const dataToSend = new FormData();
+    dataToSend.append("patient_id", Date.now().toString());
+    dataToSend.append("name", formData.name);
+    dataToSend.append("age", formData.age);
+    dataToSend.append("guardian_name", formData.guardianName);
+    dataToSend.append("guardian_email", formData.guardianEmail);
+    dataToSend.append("guardian_phone", formData.guardianPhone || '');
+    dataToSend.append("medical_history", formData.medicalHistory || '');
+    formData.images.forEach(img => dataToSend.append("images", img));
+
+    try {
+      const res = await axios.post("http://127.0.0.1:8000/register-face/", dataToSend, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      alert(res.data.message);
+
+      // Reset form
+      setFormData({
+        name: '',
+        age: '',
+        guardianName: '',
+        guardianEmail: '',
+        guardianPhone: '',
+        medicalHistory: '',
+        images: []
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("Registration failed!");
     }
-    console.log('New Patient:', formData);
-    if (onSubmit) onSubmit(formData);
-    // Reset form
-    setFormData({ name: '', guardianEmail: '', medicalHistory: '', age: '', room: '' });
   };
 
   return (
@@ -32,71 +64,35 @@ const PatientRegistration = ({ onSubmit }) => {
       <h2>Add New Patient</h2>
       <form className="registration-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="name">Patient Name*</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter patient name"
-            required
-          />
+          <label>Patient Name*</label>
+          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
-
         <div className="form-group">
-          <label htmlFor="guardianEmail">Guardian Email*</label>
-          <input
-            type="email"
-            id="guardianEmail"
-            name="guardianEmail"
-            value={formData.guardianEmail}
-            onChange={handleChange}
-            placeholder="Enter guardian email"
-            required
-          />
+          <label>Guardian Name</label>
+          <input type="text" name="guardianName" value={formData.guardianName} onChange={handleChange} />
         </div>
-
         <div className="form-group">
-          <label htmlFor="age">Age*</label>
-          <input
-            type="number"
-            id="age"
-            name="age"
-            value={formData.age}
-            onChange={handleChange}
-            placeholder="Enter patient age"
-            required
-          />
+          <label>Guardian Email*</label>
+          <input type="email" name="guardianEmail" value={formData.guardianEmail} onChange={handleChange} required />
         </div>
-
         <div className="form-group">
-          <label htmlFor="room">Room Number</label>
-          <input
-            type="text"
-            id="room"
-            name="room"
-            value={formData.room}
-            onChange={handleChange}
-            placeholder="Enter room number"
-          />
+          <label>Guardian Phone</label>
+          <input type="text" name="guardianPhone" value={formData.guardianPhone} onChange={handleChange} />
         </div>
-
         <div className="form-group">
-          <label htmlFor="medicalHistory">Medical History</label>
-          <textarea
-            id="medicalHistory"
-            name="medicalHistory"
-            value={formData.medicalHistory}
-            onChange={handleChange}
-            placeholder="Enter medical history"
-            rows="4"
-          ></textarea>
+          <label>Age*</label>
+          <input type="number" name="age" value={formData.age} onChange={handleChange} required />
         </div>
-
-        <button type="submit" className="submit-btn">
-          Add Patient
-        </button>
+        
+        <div className="form-group">
+          <label>Medical History</label>
+          <textarea name="medicalHistory" value={formData.medicalHistory} onChange={handleChange}></textarea>
+        </div>
+        <div className="form-group">
+          <label>Face Images</label>
+          <input type="file" multiple onChange={handleFileChange} />
+        </div>
+        <button type="submit">Add Patient</button>
       </form>
     </div>
   );

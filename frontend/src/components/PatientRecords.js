@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { User, Eye, Search } from 'lucide-react';
 import './PatientRecords.css'; // Import the CSS file
+import axios from 'axios';
+
 
 const PatientRecords = () => {
   const [searchTerm, setSearchTerm] = useState('');

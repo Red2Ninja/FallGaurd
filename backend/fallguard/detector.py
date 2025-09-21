@@ -31,7 +31,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "yolov7"))
 import json
 
 ENCODINGS_FILE = "fallguard/data/encodings.pickle"
-USER_DB_FILE = "fallguard/data/users.json"
+USER_FILE = "fallguard/data/users.json"
 
 if not os.path.exists(ENCODINGS_FILE) or os.path.getsize(ENCODINGS_FILE) == 0:
     os.makedirs(os.path.dirname(ENCODINGS_FILE), exist_ok=True)
@@ -51,17 +51,17 @@ known_encodings = data.get("encodings", [])
 known_names = data.get("names", [])
 
 # Load user database
-if not os.path.exists(USER_DB_FILE) or os.path.getsize(USER_DB_FILE) == 0:
-    os.makedirs(os.path.dirname(USER_DB_FILE), exist_ok=True)
-    with open(USER_DB_FILE, "w") as f:
+if not os.path.exists(USER_FILE) or os.path.getsize(USER_FILE) == 0:
+    os.makedirs(os.path.dirname(USER_FILE), exist_ok=True)
+    with open(USER_FILE, "w") as f:
         json.dump([], f, indent=4)
 
-with open(USER_DB_FILE, "r") as f:
+with open(USER_FILE, "r") as f:
     try:
         user_db = json.load(f)
     except json.JSONDecodeError:
         user_db = []
-        with open(USER_DB_FILE, "w") as fw:
+        with open(USER_FILE, "w") as fw:
             json.dump(user_db, fw, indent=4)
 
 # Allow YOLO Model class in pickle
@@ -252,7 +252,7 @@ def process_video(video_path, to_emails):
         report_file = describe_fall_frames([selected_frame])
 
         send_fall_alert_email(
-            to_emails, report_file, selected_frame["snapshot_path"], selected_frame.get("user_info")
+             report_file, selected_frame["snapshot_path"], selected_frame.get("user_info")
         )
 
         return output_video, report_file, selected_frame["snapshot_path"]

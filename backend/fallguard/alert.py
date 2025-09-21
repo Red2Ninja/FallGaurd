@@ -51,10 +51,7 @@ def send_fall_alert_email(report_file, snapshot_file, user_info=None):
 Dear Caregiver,
 
 A fall has been detected.
-PatientId: {patient_id}
-Patient: {name}
-Age: {age}
-Guardian: {guardian_name} 
+
 
 Please find the attached report and snapshot.
 

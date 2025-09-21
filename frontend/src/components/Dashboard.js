@@ -1,26 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Upload, 
-  Camera, 
-  Play, 
-  Square, 
-  Download,
-  AlertTriangle,
-  Eye,
-  ChevronDown
-} from 'lucide-react';
+import { Upload, Camera, Play, Square, Download, Eye, ChevronDown } from 'lucide-react';
 import axios from 'axios';
-import './Dashboard.css'; // Import the CSS
+import './Dashboard.css';
+
+const API_BASE = "http://127.0.0.1:8000";
 
 const Dashboard = () => {
   const [file, setFile] = useState(null);
-  const [emails, setEmails] = useState('');
   const [duration, setDuration] = useState(10);
   const [isRecording, setIsRecording] = useState(false);
-  const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState(null);
   const videoRef = useRef(null);
-  const API_BASE = "http://127.0.0.1:8000";
 
   const recentAlerts = [
     { id: '#111836', patient: 'Patient Name', room: '13:15', statusText: 'Stable', color: 'cyan' },
@@ -28,42 +19,39 @@ const Dashboard = () => {
     { id: '#171876', patient: 'Recent Name', room: '12:13', statusText: 'Critical', color: 'red' },
   ];
 
+  // Live camera setup
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        if (videoRef.current) videoRef.current.srcObject = stream;
-      })
+      .then(stream => { if (videoRef.current) videoRef.current.srcObject = stream; })
       .catch(err => console.error('Camera error:', err));
   }, []);
 
   const handleFileUpload = (e) => setFile(e.target.files[0]);
 
+  // ✅ Upload and process a video file
   const processVideo = async () => {
-    if (!file || !emails) return alert('Please select a video and enter email addresses');
-
+    if (!file) return alert('Please select a video file first.');
     setLoading(true);
     const formData = new FormData();
     formData.append("video", file);
-    formData.append("emails", emails);
-
     try {
-      const res = await axios.post(`${API_BASE}/upload-video/`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const res = await axios.post(`${API_BASE}/upload-video/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
       setResults(res.data);
     } catch (err) {
       console.error(err);
-      alert("Upload failed!");
+      alert("Video upload failed!");
     }
     setLoading(false);
   };
 
+  // ✅ Start recording from webcam
   const startRecording = async () => {
-    if (!emails) return alert('Please enter email addresses');
-    setIsRecording(true); setLoading(true);
-
+    setIsRecording(true);
+    setLoading(true);
     const formData = new FormData();
-    formData.append("emails", emails);
     formData.append("duration", duration);
-
     try {
       const res = await axios.post(`${API_BASE}/record-webcam/`, formData);
       setResults(res.data);
@@ -71,14 +59,17 @@ const Dashboard = () => {
       console.error(err);
       alert("Webcam recording failed!");
     }
-
     setTimeout(() => { setIsRecording(false); setLoading(false); }, duration * 1000);
   };
 
-  const stopRecording = () => { setIsRecording(false); setLoading(false); };
+  const stopRecording = () => {
+    setIsRecording(false);
+    setLoading(false);
+  };
 
   return (
     <div className="dashboard-container">
+      {/* Live Camera Feed */}
       <div className="video-panel">
         <div className="video-wrapper">
           <video ref={videoRef} autoPlay muted className="video-element" />
@@ -95,25 +86,38 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Controls */}
       <div className="control-panels">
         <div className="video-upload-panel">
           <h3><Upload /> Video Analysis</h3>
           <input type="file" accept="video/*" onChange={handleFileUpload} />
           {file && <p>Selected: {file.name}</p>}
-          <input type="text" placeholder="Emails..." value={emails} onChange={(e) => setEmails(e.target.value)} />
-          <button onClick={processVideo} disabled={loading}>{loading ? 'Processing...' : 'Process Video'}</button>
+          <button onClick={processVideo} disabled={loading}>
+            {loading ? 'Processing...' : 'Process Video'}
+          </button>
         </div>
 
         <div className="live-record-panel">
           <h3><Camera /> Live Recording</h3>
-          <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} min="5" max="300" />
+          <input
+            type="number"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            min="5"
+            max="300"
+          />
           <div className="record-buttons">
-            <button onClick={startRecording} disabled={isRecording || loading}><Play /> Start Recording</button>
-            <button onClick={stopRecording} disabled={!isRecording}><Square /> Stop</button>
+            <button onClick={startRecording} disabled={isRecording || loading}>
+              <Play /> Start Recording
+            </button>
+            <button onClick={stopRecording} disabled={!isRecording}>
+              <Square /> Stop
+            </button>
           </div>
         </div>
       </div>
 
+      {/* Recent Alerts */}
       <div className="recent-alerts">
         <h3>Recent Alerts <ChevronDown /></h3>
         <div className="alerts-grid">
@@ -128,12 +132,22 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Results */}
       {results && (
         <div className="results-panel">
           <h3><Download /> Processing Results</h3>
-          {results.processed_video && <a href={results.processed_video} target="_blank" rel="noreferrer"><Play /> Processed Video</a>}
-          {results.ai_report && <a href={results.ai_report} target="_blank" rel="noreferrer"><Download /> AI Report</a>}
-          {results.snapshot && <a href={results.snapshot} target="_blank" rel="noreferrer"><Eye /> Snapshot</a>}
+          {results.processed_video &&
+            <a href={results.processed_video} target="_blank" rel="noreferrer">
+              <Play /> Processed Video
+            </a>}
+          {results.ai_report &&
+            <a href={results.ai_report} target="_blank" rel="noreferrer">
+              <Download /> AI Report
+            </a>}
+          {results.snapshot &&
+            <a href={results.snapshot} target="_blank" rel="noreferrer">
+              <Eye /> Snapshot
+            </a>}
         </div>
       )}
     </div>

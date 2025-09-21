@@ -1,5 +1,5 @@
 import React , { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation , Navigate} from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -27,13 +27,32 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/patient-records" element={<PatientRecords />} />
-          <Route path="/dashboard/employee-records" element={<EmployeeRecords />} />
-          <Route path="/dashboard/registration" element={<PatientRegistration />} />
-          <Route path="/dashboard/alert-history" element={<AlertHistory />} />
-        </Routes>
+        {/* Login route */}
+        <Route path="/" element={<Login isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />} />
+
+
+        {/* Protected routes */}
+        <Route 
+          path="/dashboard" 
+          element={isLoggedIn ? <Dashboard /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/dashboard/patient-records" 
+          element={isLoggedIn ? <PatientRecords /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/dashboard/employee-records" 
+          element={isLoggedIn ? <EmployeeRecords /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/dashboard/registration" 
+          element={isLoggedIn ? <PatientRegistration /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/dashboard/alert-history" 
+          element={isLoggedIn ? <AlertHistory /> : <Navigate to="/" />} 
+        />
+      </Routes>
       </Layout>
     </Router>
   );

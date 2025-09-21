@@ -2,6 +2,7 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 import shutil
 import os
@@ -11,13 +12,17 @@ from fallguard.enroll import enroll_new_user
 
 app = FastAPI(title="FallGuard API")
 
+origins = [
+    "http://localhost:3000",  # your React frontend
+]
+
 # Folder to store uploads
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # change to ["http://localhost:3000"] in production
+    allow_origins=origins,  # change to ["http://localhost:3000"] in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,14 +102,14 @@ async def root():
     return {"message": "Welcome to FallGuard Backend!"}"""
 
 @app.post("/upload-video/")
-async def upload_video(video: UploadFile = File(...), emails: str = Form(...)):
+async def upload_video(video: UploadFile = File(...)):
     video_path = os.path.join(UPLOAD_FOLDER, video.filename)
     with open(video_path, "wb") as f:
         shutil.copyfileobj(video.file, f)
 
-    email_list = [e.strip() for e in emails.split(",")]
+    
 
-    processed_video, report_file, snapshot_file = process_video(video_path, email_list)
+    processed_video, report_file, snapshot_file = process_video(video_path, [])
 
     if processed_video is None:
         return {"message": "No fall detected in the video."}
@@ -117,11 +122,11 @@ async def upload_video(video: UploadFile = File(...), emails: str = Form(...)):
     }
 
 @app.post("/record-webcam/")
-async def record_webcam(emails: str = Form(...), duration: int = Form(10)):
-    email_list = [e.strip() for e in emails.split(",")]
+async def record_webcam(duration: int = Form(10)):
+    
     video_path = capture_webcam_video(duration=duration)
 
-    processed_video, report_file, snapshot_file = process_video(video_path, email_list)
+    processed_video, report_file, snapshot_file = process_video(video_path, [])
 
     if processed_video is None:
         return {"message": "No fall detected in the video."}
@@ -170,7 +175,7 @@ async def register_face(
             shutil.copyfileobj(img.file, f)
         image_paths.append(save_path)
 
-    # Call the enrollment logic
+    '''# Call the enrollment logic
     enroll_new_user(
         patient_id=patient_id,
         images=image_paths,
@@ -180,6 +185,32 @@ async def register_face(
         guardian_phone=guardian_phone,
         guardian_email=guardian_email,
         medical_history=medical_history
+    )'''
+
+    from fallguard.enroll import start_patient_enrollment
+
+    # Example usage inside a route or function
+    start_patient_enrollment(
+        patient_id="P001",
+        name="John Doe",
+        age=75,
+        guardian_name="Jane Doe",
+        guardian_phone="1234567890",
+        guardian_email="jane@example.com",
+        medical_history="Diabetes, Hypertension"
     )
 
+
     return {"message": f"✅ User '{name}' registered successfully with {len(image_paths)} images."}
+
+
+
+class LoginData(BaseModel):
+    email: str
+    password: str
+
+@app.post("/login")
+async def login(data: LoginData):
+    if data.email == "carefall@hosp.com" and data.password == "powerpuff":
+        return {"success": True, "message": "Login successful"}
+    return {"success": False, "message": "Invalid email or password"}
