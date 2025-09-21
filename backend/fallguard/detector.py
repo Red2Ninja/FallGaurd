@@ -173,14 +173,14 @@ def process_video(video_path, to_emails):
         frame_id += 1
 
         # --- FACE RECOGNITION ---
-        rgb_small = cv2.cvtColor(cv2.resize(frame, (0, 0), fx=0.5, fy=0.5), cv2.COLOR_BGR2RGB)
+        rgb_small = cv2.cvtColor(cv2.resize(frame, (0, 0), fx=0.75, fy=0.75), cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_small, model="hog")
         face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
 
         face_names = []
         user_infos = []
         for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.45)
+            matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.6)
             name = "Unknown"
             user_info = {}
             if True in matches:

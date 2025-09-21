@@ -52,7 +52,7 @@ def save_user_db(users):
     with open(USER_DB_FILE, "w") as f:
         json.dump(users, f, indent=4)
 
-def enroll_new_user(images, name, guardian_name, guardian_phone, guardian_email, medical_history):
+def enroll_new_user(patient_id,images, name,age , guardian_name, guardian_phone, guardian_email, medical_history):
     """
     images: list of file paths (or webcam frames) for the user
     metadata: user + guardian details
@@ -75,12 +75,14 @@ def enroll_new_user(images, name, guardian_name, guardian_phone, guardian_email,
 
     # Save encodings incrementally
     encodings_data["encodings"].extend(new_encodings)
-    encodings_data["names"].extend([name] * len(new_encodings))
+    encodings_data["names"].extend([patient_id] * len(new_encodings))
     save_encodings(encodings_data)
 
     # Save metadata in users.json
     user_entry = {
+        "patient_id": patient_id,
         "name": name,
+        "age": age,
         "guardian_name": guardian_name,
         "guardian_phone": guardian_phone,
         "guardian_email": guardian_email,

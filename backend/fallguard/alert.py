@@ -1,14 +1,40 @@
-# fallguard/alert.py
 import smtplib
 import ssl
+import json
 from config import SENDER_EMAIL, APP_PASSWORD
 from email.message import EmailMessage
 
-def send_fall_alert_email(to_emails, report_file, snapshot_file, user_info=None):
+USERS_FILE = "users.json"
+DEFAULT_EMAIL = "smoothh.operatorr55@gmail.com"
+
+def get_user_emails():
+    try:
+        with open(USERS_FILE, "r") as f:
+            users = json.load(f)
+            emails = []
+            for user in users:
+                if user.get("email"):
+                    emails.append(user["email"])
+                if user.get("guardian_email"):
+                    emails.append(user["guardian_email"])
+            return emails
+    except Exception as e:
+        print("⚠️ Could not read users.json:", e)
+        return []
+
+
+def send_fall_alert_email(report_file, snapshot_file, user_info=None):
     sender_email = SENDER_EMAIL
     app_password = APP_PASSWORD  # Google App Password
 
+    # Load emails from users.json + add default
+    to_emails = get_user_emails()
+    if DEFAULT_EMAIL not in to_emails:
+        to_emails.append(DEFAULT_EMAIL)
+
     name = user_info.get("name", "Unknown") if user_info else "Unknown"
+    age = user_info.get("age", "Unknown") if user_info else "Unknown"
+    patient_id = user_info.get("patient_id", "Unknown") if user_info else "Unknown"
     guardian_name = user_info.get("guardian_name", "N/A") if user_info else "N/A"
     guardian_email = user_info.get("guardian_email", "N/A") if user_info else "N/A"
     
@@ -24,12 +50,18 @@ def send_fall_alert_email(to_emails, report_file, snapshot_file, user_info=None)
     msg.set_content(f"""
 Dear Caregiver,
 
-A fall has been detected. Please find the attached report and snapshot.
+A fall has been detected.
+PatientId: {patient_id}
+Patient: {name}
+Age: {age}
+Guardian: {guardian_name} 
+
+Please find the attached report and snapshot.
 
 Report Summary:
 {report_content}
 
-Regards,
+Regards,  
 Fall Detection System
     """)
 
@@ -46,4 +78,4 @@ Fall Detection System
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(sender_email, app_password)
         server.send_message(msg)
-        print(" Email sent to:", to_emails)
+        print("📧 Email sent to:", to_emails)

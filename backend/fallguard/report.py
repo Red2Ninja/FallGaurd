@@ -2,15 +2,43 @@
 from PIL import Image
 import google.generativeai as genai
 import os
+import json
 from config import GEMINI_API_KEY
 
 # Configure your API key
 genai.configure(api_key=GEMINI_API_KEY)
 
+USERS_FILE = "users.json"
+
+def get_user_info(patient_id):
+    """Fetch user details from users.json using patient_id"""
+    try:
+        with open(USERS_FILE, "r") as f:
+            users = json.load(f)
+            # Assuming users is a list of dicts
+            for user in users:
+                if user.get("patient_id") == patient_id:
+                    return {
+                        "name": user.get("name", "Unknown"),
+                        "patient_id": patient_id,
+                        "age": user.get("age", "Unknown"),
+                        "medical_history": user.get("medical_history", "Unknown")
+                    }
+    except Exception as e:
+        print("⚠️ Could not read users.json:", e)
+
+    # fallback if patient not found
+    return {
+        "name": "Unknown",
+        "patient_id": patient_id,
+        "age": "Unknown",
+        "medical_history": "Unknown"
+    }
+
 def describe_fall_frames(fall_frames, fps=30):
     """
-    Generates a concise AI report for the middle fall frame
-    fall_frames: list of dicts containing 'snapshot_path', 'frame_id', 'bbox', 'pose'
+    Generates a concise AI report for each fall frame
+    fall_frames: list of dicts containing 'snapshot_path', 'frame_id', 'bbox', 'pose', 'patient_id'
     """
     model = genai.GenerativeModel("gemini-1.5-flash")
     report = []
@@ -20,7 +48,12 @@ def describe_fall_frames(fall_frames, fps=30):
         frame_id = info["frame_id"]
         bbox = info["bbox"]
         pose = info["pose"]
-        name = info.get("name", "Unknown") 
+        patient_id = info.get("patient_id", "Unknown")
+
+        user_info = get_user_info(patient_id)
+        name = user_info["name"]
+        age = user_info["age"]
+        medical_history = user_info["medical_history"]
 
         timestamp = round(frame_id / fps, 2)  # approximate timestamp
 
@@ -30,14 +63,17 @@ You are an AI assistant for fall monitoring in videos.
 Attached is an image of a person, with detected pose keypoints: {pose}
 
 Create a short report with the following:
-- Person's name: {name}
+- Patient ID: {patient_id}
+- Name: {name}
+- Age: {age}
+- Medical history: {medical_history}
 - Approximate timestamp: {timestamp} seconds
 - Severity of the fall
 - Person's posture: falling, lying, sitting, or standing
-- Any visible hazards or describe surrounding context
+- Any visible hazards or surrounding context
 - Recommended alert or safety notes (if necessary)
 
-Keep it concise, 2-3 sentences max, in structured format, do not use bold keep it email text message appropriate.
+Keep it concise, 2-3 sentences max, in structured format, email/text friendly.
         """
 
         try:
@@ -46,22 +82,31 @@ Keep it concise, 2-3 sentences max, in structured format, do not use bold keep i
         except Exception as e:
             description = f"GenAI failed: {e}"
 
+        # Add frame report
         report.append({
+            "patient_id": patient_id,
+            "name": name,
+            "age": age,
+            "medical_history": medical_history,
             "frame_id": frame_id,
             "bbox": bbox,
-            "description": description,
-            "name": name
+            "description": description
         })
 
     # Save the report
-   
-
-    report_file = os.path.join("uploads", "fall_report.txt")
-    os.makedirs("uploads", exist_ok=True)  
+    report_dir = "uploads"
+    os.makedirs(report_dir, exist_ok=True)
+    report_file = os.path.join(report_dir, "fall_report.txt")
 
     with open(report_file, "w") as f:
         for entry in report:
-            f.write(f"\n{entry['description']}\n\n")
+            f.write(f"Patient ID: {entry['patient_id']}\n")
+            f.write(f"Name: {entry['name']}\n")
+            f.write(f"Age: {entry['age']}\n")
+            f.write(f"Medical History: {entry['medical_history']}\n")
+            f.write(f"Frame ID: {entry['frame_id']}, BBox: {entry['bbox']}\n")
+            f.write(f"Description:\n{entry['description']}\n")
+            f.write("="*50 + "\n")
 
-    print(" Fall report saved as fall_report.txt")
+    print(f"✅ Fall report saved as {report_file}")
     return report_file

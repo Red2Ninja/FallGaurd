@@ -148,7 +148,9 @@ async def root():
 
 @app.post("/register-face/")
 async def register_face(
+    patient_id: str = Form(...),
     name: str = Form(...),
+    age: int = Form(...),   
     guardian_name: str = Form(...),
     guardian_phone: str = Form(...),
     guardian_email: str = Form(...),
@@ -170,8 +172,10 @@ async def register_face(
 
     # Call the enrollment logic
     enroll_new_user(
+        patient_id=patient_id,
         images=image_paths,
         name=name,
+        age=age,
         guardian_name=guardian_name,
         guardian_phone=guardian_phone,
         guardian_email=guardian_email,
