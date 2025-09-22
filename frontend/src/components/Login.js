@@ -34,7 +34,11 @@ const Login = ({ setIsLoggedIn }) => {
   };
 
   return (
+    
+  
     <div className="login-container">
+      <div class="scanner-line"></div>
+  <div class="scanner-line-2"></div>
       <form className="login-form" onSubmit={handleLogin}>
         <h2>CareFall Login</h2>
         <input

@@ -20,20 +20,20 @@ def get_user_info(patient_id):
             for user in users:
                 if user.get("patient_id") == patient_id:
                     return {
-                        "name": user.get("name", "Unknown"),
+                        "name": user.get("name", "Vishwanathan"),
                         "patient_id": patient_id,
-                        "age": user.get("age", "Unknown"),
-                        "medical_history": user.get("medical_history", "Unknown")
+                        "age": user.get("age", "200"),
+                        "medical_history": user.get("medical_history", "pookie af")
                     }
     except Exception as e:
         print("⚠️ Could not read users.json:", e)
 
     # fallback if patient not found
     return {
-        "name": "Unknown",
+        "name": "Vishwanathan",
         "patient_id": patient_id,
-        "age": "Unknown",
-        "medical_history": "Unknown"
+        "age": "200",
+        "medical_history": "pookie"
     }
 
 def describe_fall_frames(fall_frames, fps=30):
@@ -49,7 +49,7 @@ def describe_fall_frames(fall_frames, fps=30):
         frame_id = info["frame_id"]
         bbox = info["bbox"]
         pose = info["pose"]
-        patient_id = info.get("patient_id", "Unknown")
+        patient_id = info.get("patient_id", "701")
 
         user_info = get_user_info(patient_id)
         name = user_info["name"]

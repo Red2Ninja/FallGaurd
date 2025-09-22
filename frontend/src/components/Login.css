@@ -1,110 +1,140 @@
-/* Login.css */
+/* CareFall - Advanced Tech Login Interface */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+/* Main Container with Medical Tech Background */
 .login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #0a1628;
-  position: relative;
   overflow: hidden;
 }
 
-/* Add scanner line element */
-.login-container .scanner-line {
-  position: absolute;
-  top: 0;
-  left: -100px;
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(180deg, 
-    transparent 0%, 
-    rgba(6, 182, 212, 0.4) 20%, 
-    rgba(6, 182, 212, 0.8) 50%, 
-    rgba(6, 182, 212, 0.4) 80%, 
-    transparent 100%
-  );
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
-  animation: scanner-sweep 12s ease-in-out infinite;
-  z-index: 0;
-}
-
-/* Medical tech grid background */
+/* Static medical tech grid background */
 .login-container::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background-image: 
-    /* Medical cross pattern */
-    repeating-linear-gradient(0deg, transparent, transparent 98px, rgba(6, 182, 212, 0.03) 100px, rgba(6, 182, 212, 0.03) 102px),
-    repeating-linear-gradient(90deg, transparent, transparent 98px, rgba(6, 182, 212, 0.03) 100px, rgba(6, 182, 212, 0.03) 102px),
-    /* Heartbeat line pattern */
+    /* Static medical cross grid */
+    repeating-linear-gradient(0deg, transparent, transparent 98px, rgba(6, 182, 212, 0.06) 100px, rgba(6, 182, 212, 0.06) 102px),
+    repeating-linear-gradient(90deg, transparent, transparent 98px, rgba(6, 182, 212, 0.06) 100px, rgba(6, 182, 212, 0.06) 102px),
+    /* Diagonal tech lines */
     repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(6, 182, 212, 0.04) 42px, rgba(6, 182, 212, 0.04) 44px),
-    /* Pulse rings */
-    radial-gradient(circle at 15% 25%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.06) 0%, transparent 35%),
-    radial-gradient(circle at 70% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 30%);
-  animation: medical-pulse 8s ease-in-out infinite;
+    repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(6, 182, 212, 0.03) 62px, rgba(6, 182, 212, 0.03) 64px),
+    /* Static pulse rings */
+    radial-gradient(circle at 20% 30%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.06) 0%, transparent 35%),
+    radial-gradient(circle at 60% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 30%),
+    radial-gradient(circle at 30% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 25%);
+  opacity: 0.8;
+  z-index: 1;
 }
 
-/* Circuit and data flow lines */
+/* Static circuit pattern overlay */
 .login-container::after {
   content: '';
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background-image: 
-    /* Horizontal data streams */
-    linear-gradient(0deg, transparent 0%, transparent 48%, rgba(6, 182, 212, 0.1) 50%, rgba(6, 182, 212, 0.15) 51%, rgba(6, 182, 212, 0.1) 52%, transparent 54%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, transparent 23%, rgba(6, 182, 212, 0.08) 25%, rgba(6, 182, 212, 0.12) 26%, rgba(6, 182, 212, 0.08) 27%, transparent 29%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, transparent 73%, rgba(6, 182, 212, 0.06) 75%, rgba(6, 182, 212, 0.1) 76%, rgba(6, 182, 212, 0.06) 77%, transparent 79%, transparent 100%),
-    /* Vertical circuit lines */
-    linear-gradient(90deg, transparent 0%, transparent 18%, rgba(6, 182, 212, 0.05) 20%, rgba(6, 182, 212, 0.1) 21%, rgba(6, 182, 212, 0.05) 22%, transparent 24%, transparent 100%),
-    linear-gradient(90deg, transparent 0%, transparent 63%, rgba(6, 182, 212, 0.04) 65%, rgba(6, 182, 212, 0.08) 66%, rgba(6, 182, 212, 0.04) 67%, transparent 69%, transparent 100%),
-    linear-gradient(90deg, transparent 0%, transparent 83%, rgba(6, 182, 212, 0.03) 85%, rgba(6, 182, 212, 0.06) 86%, rgba(6, 182, 212, 0.03) 87%, transparent 89%, transparent 100%);
-  background-size: 100% 120px, 100% 180px, 100% 90px, 150px 100%, 220px 100%, 180px 100%;
-  animation: data-flow 15s linear infinite;
+    /* Horizontal tech lines */
+    linear-gradient(0deg, transparent 0%, transparent 24%, rgba(6, 182, 212, 0.08) 25%, rgba(6, 182, 212, 0.08) 26%, transparent 27%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, transparent 49%, rgba(6, 182, 212, 0.1) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, transparent 74%, rgba(6, 182, 212, 0.06) 75%, rgba(6, 182, 212, 0.06) 76%, transparent 77%, transparent 100%),
+    /* Vertical tech lines */
+    linear-gradient(90deg, transparent 0%, transparent 19%, rgba(6, 182, 212, 0.07) 20%, rgba(6, 182, 212, 0.07) 21%, transparent 22%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, transparent 64%, rgba(6, 182, 212, 0.05) 65%, rgba(6, 182, 212, 0.05) 66%, transparent 67%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, transparent 84%, rgba(6, 182, 212, 0.04) 85%, rgba(6, 182, 212, 0.04) 86%, transparent 87%, transparent 100%);
+  opacity: 0.7;
+  z-index: 1;
 }
 
-/* Medical scanner overlay */
-.login-container .scanner-line {
-  position: absolute;
-  top: 0;
-  left: -100px;
-  width: 2px;
-  height: 100%;
+/* Subtle pulsing scanner lines that stay in frame */
+.tech-particle {
+  position: fixed;
+  z-index: 2;
+}
+
+.tech-particle:nth-child(1) {
+  top: 10%;
+  left: 15%;
+  width: 1px;
+  height: 70%;
   background: linear-gradient(180deg, 
     transparent 0%, 
-    rgba(6, 182, 212, 0.4) 20%, 
-    rgba(6, 182, 212, 0.8) 50%, 
-    rgba(6, 182, 212, 0.4) 80%, 
+    rgba(6, 182, 212, 0.3) 30%, 
+    rgba(6, 182, 212, 0.6) 50%, 
+    rgba(6, 182, 212, 0.3) 70%, 
     transparent 100%
   );
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
-  animation: scanner-sweep 12s ease-in-out infinite;
-  z-index: 0;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+  animation: subtle-pulse 3s ease-in-out infinite;
 }
 
-@keyframes medical-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+.tech-particle:nth-child(2) {
+  top: 15%;
+  right: 20%;
+  width: 1px;
+  height: 60%;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(6, 182, 212, 0.2) 40%, 
+    rgba(6, 182, 212, 0.4) 50%, 
+    rgba(6, 182, 212, 0.2) 60%, 
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+  animation: subtle-pulse 4s ease-in-out infinite reverse;
 }
 
-@keyframes data-flow {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(-50px, -30px); }
+.tech-particle:nth-child(3) {
+  top: 80%;
+  left: 25%;
+  width: 2px;
+  height: 2px;
+  background: rgba(6, 182, 212, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+  animation: subtle-pulse 5s ease-in-out infinite;
 }
 
-@keyframes scanner-sweep {
-  0% { left: -100px; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { left: calc(100% + 100px); opacity: 0; }
+.tech-particle:nth-child(4) {
+  top: 30%;
+  right: 30%;
+  width: 2px;
+  height: 2px;
+  background: rgba(6, 182, 212, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+  animation: subtle-pulse 6s ease-in-out infinite reverse;
 }
+
+/* Main Login Form - Updated for grid design */
 
 .login-form {
   background: rgba(15, 23, 42, 0.9);
@@ -120,7 +150,7 @@
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(6, 182, 212, 0.1);
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 /* Logo and title */
@@ -143,12 +173,13 @@
   text-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
 }
 
-/* Input styling */
+/* Input styling - FIXED */
 .input-group {
   position: relative;
 }
 
-.login-form input {
+.login-form input,
+.input-field {
   width: 100%;
   padding: 1rem 1.25rem;
   border-radius: 0.75rem;
@@ -159,26 +190,23 @@
   outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  position: relative;
+  z-index: 11;
 }
 
-.login-form input::placeholder {
+.login-form input::placeholder,
+.input-field::placeholder {
   color: #64748b;
 }
 
-.login-form input:focus {
+.login-form input:focus,
+.input-field:focus {
   border-color: #06b6d4;
   background: rgba(15, 23, 42, 0.95);
   box-shadow: 
     0 0 0 3px rgba(6, 182, 212, 0.1),
     0 0 20px rgba(6, 182, 212, 0.2);
   transform: translateY(-1px);
-}
-
-/* Username field with pre-filled styling */
-.login-form input[readonly] {
-  background: rgba(6, 182, 212, 0.1);
-  border-color: rgba(6, 182, 212, 0.3);
-  color: #06b6d4;
 }
 
 /* Remember me and forgot password */
@@ -216,7 +244,8 @@
 }
 
 /* Login button */
-.login-form button {
+.login-form button,
+.login-button {
   width: 100%;
   padding: 1rem;
   border-radius: 0.75rem;
@@ -231,27 +260,192 @@
   letter-spacing: 0.05em;
   box-shadow: 0 4px 14px 0 rgba(6, 182, 212, 0.3);
   margin-top: 0.5rem;
+  position: relative;
+  z-index: 11;
 }
 
-.login-form button:hover {
+.login-form button:hover,
+.login-button:hover {
   background: linear-gradient(135deg, #0891b2, #0e7490);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px 0 rgba(6, 182, 212, 0.4);
 }
 
-.login-form button:active {
+.login-form button:active,
+.login-button:active {
   transform: translateY(0);
   box-shadow: 0 4px 14px 0 rgba(6, 182, 212, 0.3);
 }
 
-/* Responsive design */
-@media (max-width: 480px) {
+/* Shield Logo and title - Updated for grid design */
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+
+.app-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+/* Footer Links */
+.form-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.forgot-link {
+  color: rgba(0, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.forgot-link:hover {
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Tech Status Bar */
+.status-bar {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: status-blink 2s ease-in-out infinite;
+}
+
+.status-dot.online {
+  background: #00ff00;
+  box-shadow: 0 0 10px #00ff00;
+}
+
+.status-dot.secure {
+  background: #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+}
+
+/* Minimal subtle animations - Updated for grid design */
+@keyframes subtle-pulse {
+  0%, 100% { 
+    opacity: 0.4; 
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+  }
+  50% { 
+    opacity: 0.8; 
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .login-form {
-    width: 90%;
+    width: 85vw;
+    max-width: 400px;
+    margin: 0;
     padding: 2rem 1.5rem;
   }
   
-  .login-form h2 {
-    font-size: 2rem;
+  .app-title {
+    font-size: 1.8rem;
   }
+  
+  .tech-logo {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .status-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+    bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form {
+    width: 90vw;
+    padding: 1.5rem 1rem;
+  }
+  
+  .app-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .login-form {
+    padding: 1.5rem 2rem;
+  }
+  
+  .logo-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .tech-logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .status-bar {
+    bottom: 0.5rem;
+  }
+}
+
+/* Loading State */
+.login-button.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.login-button.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success Animation */
+@keyframes success-flash {
+  0% { background: linear-gradient(135deg, #00ffff, #8a2be2, #ff1493); }
+  50% { background: linear-gradient(135deg, #00ff00, #00ff00, #00ff00); }
+  100% { background: linear-gradient(135deg, #00ffff, #8a2be2, #ff1493); }
 }

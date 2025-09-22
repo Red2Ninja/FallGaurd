@@ -1,4 +1,11 @@
 /* PatientRegistration.css */
+body {
+  background-color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
 .registration-container {
   max-width: 500px;
   margin: 2rem auto;
@@ -61,4 +68,28 @@
 
 .submit-btn:hover {
   background-color: #2563eb;
+}
+
+.success-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #4BB543;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-weight: bold;
+  z-index: 1000;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
 }

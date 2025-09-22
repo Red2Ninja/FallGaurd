@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Camera, Play, Square, Download, Eye, ChevronDown } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Upload, Camera, Play, Download, Eye, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 import './Dashboard.css';
 
@@ -8,32 +8,24 @@ const API_BASE = "http://127.0.0.1:8000";
 const Dashboard = () => {
   const [file, setFile] = useState(null);
   const [duration, setDuration] = useState(10);
-  const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const videoRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
 
   const recentAlerts = [
-    { id: '#111836', patient: 'Patient Name', room: '13:15', statusText: 'Stable', color: 'cyan' },
-    { id: '#0B101B', patient: 'Patient Name', room: '2:17', statusText: 'Warning', color: 'yellow' },
-    { id: '#171876', patient: 'Recent Name', room: '12:13', statusText: 'Critical', color: 'red' },
+    { id: '#111836', patient: 'Aditi', room: '1004A', statusText: 'UnStable', color: 'cyan' },
+    { id: '#0B101B', patient: 'Sanjana', room: '1004A', statusText: 'Sleeping', color: 'yellow' },
+    { id: '#171876', patient: 'Aarya', room: '1004C', statusText: 'Unconcious', color: 'red' },
   ];
 
-  // Live camera setup
-  useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { if (videoRef.current) videoRef.current.srcObject = stream; })
-      .catch(err => console.error('Camera error:', err));
-  }, []);
-
+  // Handle file upload
   const handleFileUpload = (e) => setFile(e.target.files[0]);
 
-  // ✅ Upload and process a video file
-  const processVideo = async () => {
-    if (!file) return alert('Please select a video file first.');
+  // Process selected/uploaded video
+  const processVideo = async (formData) => {
     setLoading(true);
-    const formData = new FormData();
-    formData.append("video", file);
     try {
       const res = await axios.post(`${API_BASE}/upload-video/`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -46,57 +38,78 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  // ✅ Start recording from webcam
-  const startRecording = async () => {
-    setIsRecording(true);
-    setLoading(true);
+  // Process a file from disk
+  const handleProcessUpload = async () => {
+    if (!file) return alert('Please select a video file first.');
     const formData = new FormData();
-    formData.append("duration", duration);
-    try {
-      const res = await axios.post(`${API_BASE}/record-webcam/`, formData);
-      setResults(res.data);
-    } catch (err) {
-      console.error(err);
-      alert("Webcam recording failed!");
-    }
-    setTimeout(() => { setIsRecording(false); setLoading(false); }, duration * 1000);
+    formData.append("video", file);
+    await processVideo(formData);
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-    setLoading(false);
+  // Record from webcam
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      if (videoRef.current) videoRef.current.srcObject = stream;
+
+      recordedChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' });
+        const recordedFile = new File([blob], 'recorded_video.mp4', { type: 'video/mp4' });
+
+        const formData = new FormData();
+        formData.append("video", recordedFile);
+
+        await processVideo(formData);
+
+        // Stop camera stream
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+
+      // Auto stop after duration
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, duration * 1000);
+
+    } catch (err) {
+      console.error("Webcam error:", err);
+      alert("Could not access webcam");
+    }
   };
 
   return (
     <div className="dashboard-container">
-      {/* Live Camera Feed */}
+      {/* Live Camera Feed (only visible during recording) */}
       <div className="video-panel">
         <div className="video-wrapper">
           <video ref={videoRef} autoPlay muted className="video-element" />
-          <div className="live-indicator">
-            <div className="live-dot"></div>
-            <span>Live Feed - Room A1</span>
-          </div>
-          {isRecording && (
-            <div className="recording-indicator">
-              <div className="live-dot"></div>
-              <span>Recording</span>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Controls */}
       <div className="control-panels">
+        {/* Upload Panel */}
         <div className="video-upload-panel">
           <h3><Upload /> Video Analysis</h3>
           <input type="file" accept="video/*" onChange={handleFileUpload} />
           {file && <p>Selected: {file.name}</p>}
-          <button onClick={processVideo} disabled={loading}>
-            {loading ? 'Processing...' : 'Process Video'}
+          <button onClick={handleProcessUpload} disabled={loading}>
+            {loading ? 'Processing...' : 'Process Uploaded Video'}
           </button>
         </div>
 
+        {/* Webcam Panel */}
         <div className="live-record-panel">
           <h3><Camera /> Live Recording</h3>
           <input
@@ -106,14 +119,9 @@ const Dashboard = () => {
             min="5"
             max="300"
           />
-          <div className="record-buttons">
-            <button onClick={startRecording} disabled={isRecording || loading}>
-              <Play /> Start Recording
-            </button>
-            <button onClick={stopRecording} disabled={!isRecording}>
-              <Square /> Stop
-            </button>
-          </div>
+          <button onClick={startRecording} disabled={loading}>
+            {loading ? 'Processing...' : <><Play /> Start Recording</>}
+          </button>
         </div>
       </div>
 

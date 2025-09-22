@@ -36,9 +36,9 @@ def send_fall_alert_email(report_file, snapshot_file, user_info=None):
     if DEFAULT_EMAIL not in to_emails:
         to_emails.append(DEFAULT_EMAIL)
 
-    name = user_info.get("name", "Unknown") if user_info else "Unknown"
-    age = user_info.get("age", "Unknown") if user_info else "Unknown"
-    patient_id = user_info.get("patient_id", "Unknown") if user_info else "Unknown"
+    name = user_info.get("name", "Vishwanathan") if user_info else "Vishwanathan"
+    age = user_info.get("age", "200") if user_info else "200"
+    patient_id = user_info.get("patient_id", "701") if user_info else "701"
     guardian_name = user_info.get("guardian_name", "N/A") if user_info else "N/A"
     guardian_email = user_info.get("guardian_email", "N/A") if user_info else "N/A"
     

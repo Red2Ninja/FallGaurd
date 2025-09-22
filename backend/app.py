@@ -104,13 +104,16 @@ async def root():
 
 @app.post("/upload-video/")
 async def upload_video(video: UploadFile = File(...)):
-    video_path = os.path.join(UPLOAD_FOLDER, video.filename)
-    with open(video_path, "wb") as f:
+    # Ensure upload folder exists
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+    # Force save as mp4 to avoid OpenCV issues
+    save_path = os.path.join(UPLOAD_FOLDER, "input_video.mp4")
+    with open(save_path, "wb") as f:
         shutil.copyfileobj(video.file, f)
 
-    
-
-    processed_video, report_file, snapshot_file = process_video(video_path, [])
+    # Process
+    processed_video, report_file, snapshot_file = process_video(save_path, [])
 
     if processed_video is None:
         return {"message": "No fall detected in the video."}
@@ -122,23 +125,27 @@ async def upload_video(video: UploadFile = File(...)):
         "snapshot": f"{base_url}/{os.path.basename(snapshot_file)}"
     }
 
-@app.post("/record-webcam/")
+
+'''@app.post("/record-webcam/")
 async def record_webcam(duration: int = Form(10)):
-    
+    # 1. Capture webcam video
     video_path = capture_webcam_video(duration=duration)
 
+    # 2. Run the same detector logic as upload-video
     processed_video, report_file, snapshot_file = process_video(video_path, [])
 
+    base_url = "http://127.0.0.1:8000/download"
     if processed_video is None:
         return {"message": "No fall detected in the video."}
 
-    base_url = "http://127.0.0.1:8000/download"
+    # 3. Return results in the SAME format
     return {
         "processed_video": f"{base_url}/{os.path.basename(processed_video)}",
         "ai_report": f"{base_url}/{os.path.basename(report_file)}",
         "snapshot": f"{base_url}/{os.path.basename(snapshot_file)}"
-    }
+    }'''
 
+    
 @app.get("/download/{file_name}")
 async def download_file(file_name: str):
     file_path = os.path.join(UPLOAD_FOLDER, file_name)

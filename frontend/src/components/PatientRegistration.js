@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './PatientRegistration.css';
 import axios from 'axios';
 
-const PatientRegistration = ({ onSubmit }) => {
+const PatientRegistration = () => {
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -12,6 +12,8 @@ const PatientRegistration = ({ onSubmit }) => {
     medicalHistory: '',
     images: []
   });
+
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +42,9 @@ const PatientRegistration = ({ onSubmit }) => {
       const res = await axios.post("http://127.0.0.1:8000/register-face/", dataToSend, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      alert(res.data.message);
+
+      // Show success message as toast
+      setSuccessMessage(res.data.message);
 
       // Reset form
       setFormData({
@@ -58,6 +62,14 @@ const PatientRegistration = ({ onSubmit }) => {
       alert("Registration failed!");
     }
   };
+
+  // Automatically hide the success toast after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   return (
     <div className="registration-container">
@@ -94,6 +106,12 @@ const PatientRegistration = ({ onSubmit }) => {
         </div>
         <button type="submit">Add Patient</button>
       </form>
+
+      {successMessage && (
+        <div className="success-toast">
+          ✅ {successMessage}
+        </div>
+      )}
     </div>
   );
 };
