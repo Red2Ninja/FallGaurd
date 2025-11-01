@@ -9,9 +9,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 USERS_FILE = os.path.join(BASE_DIR, "data", "users.json")
 
-DEFAULT_EMAIL = "smoothh.operatorr55@gmail.com"
+DEFAULT_EMAIL = "aryaanagvekar@gmail.com"
 
-def get_user_emails():
+'''def get_user_emails():
     try:
         with open(USERS_FILE, "r") as f:
             users = json.load(f)
@@ -24,8 +24,23 @@ def get_user_emails():
             return emails
     except Exception as e:
         print("⚠️ Could not read users.json:", e)
-        return []
+        return []'''
 
+
+def get_user_emails():
+    try:
+        with open(USERS_FILE, "r") as f:
+            users = json.load(f)          # dict  id : record
+            emails = []
+            for uid, rec in users.items():        # <── iterate over items
+                if rec.get("email"):
+                    emails.append(rec["email"])
+                if rec.get("guardian_email"):
+                    emails.append(rec["guardian_email"])
+            return emails
+    except Exception as e:
+        print("⚠️ Could not read users.json:", e)
+        return []
 
 def send_fall_alert_email(report_file, snapshot_file, user_info=None):
     sender_email = SENDER_EMAIL
@@ -36,11 +51,11 @@ def send_fall_alert_email(report_file, snapshot_file, user_info=None):
     if DEFAULT_EMAIL not in to_emails:
         to_emails.append(DEFAULT_EMAIL)
 
-    name = user_info.get("name", "Vishwanathan") if user_info else "Vishwanathan"
-    age = user_info.get("age", "200") if user_info else "200"
+    name = user_info.get("name", "Aarya") if user_info else "Aarya"
+    age = user_info.get("age", "20") if user_info else "20"
     patient_id = user_info.get("patient_id", "701") if user_info else "701"
-    guardian_name = user_info.get("guardian_name", "N/A") if user_info else "N/A"
-    guardian_email = user_info.get("guardian_email", "N/A") if user_info else "N/A"
+    guardian_name = user_info.get("guardian_name", "Anagha") if user_info else "Anagha"
+    guardian_email = user_info.get("guardian_email", "aryaanagvekar@gmail.com") if user_info else "aryaanagvekar@gmail.com"
     
     # Read report
     with open(report_file, "r") as f:

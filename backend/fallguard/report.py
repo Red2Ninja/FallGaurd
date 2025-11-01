@@ -20,20 +20,20 @@ def get_user_info(patient_id):
             for user in users:
                 if user.get("patient_id") == patient_id:
                     return {
-                        "name": user.get("name", "Vishwanathan"),
+                        "name": user.get("name", "Aarya"),
                         "patient_id": patient_id,
-                        "age": user.get("age", "200"),
-                        "medical_history": user.get("medical_history", "pookie af")
+                        "age": user.get("age", "20"),
+                        "medical_history": user.get("medical_history", "N/A")
                     }
     except Exception as e:
         print("⚠️ Could not read users.json:", e)
 
     # fallback if patient not found
     return {
-        "name": "Vishwanathan",
+        "name": "Aarya",
         "patient_id": patient_id,
-        "age": "200",
-        "medical_history": "pookie"
+        "age": "20",
+        "medical_history": "N/A"
     }
 
 def describe_fall_frames(fall_frames, fps=30):
@@ -41,7 +41,7 @@ def describe_fall_frames(fall_frames, fps=30):
     Generates a concise AI report for each fall frame
     fall_frames: list of dicts containing 'snapshot_path', 'frame_id', 'bbox', 'pose', 'patient_id'
     """
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("models/gemini-2.5-pro")
     report = []
 
     for info in fall_frames:
@@ -74,7 +74,7 @@ Create a short report with the following:
 - Any visible hazards or surrounding context
 - Recommended alert or safety notes (if necessary)
 
-Keep it concise, 2-3 sentences max, in structured format, email/text friendly.
+Keep it concise, 2-3 sentences max, in structured format, email/text friendly , don't use bold.
         """
 
         try:
@@ -89,8 +89,6 @@ Keep it concise, 2-3 sentences max, in structured format, email/text friendly.
             "name": name,
             "age": age,
             "medical_history": medical_history,
-            "frame_id": frame_id,
-            "bbox": bbox,
             "description": description
         })
 
@@ -105,7 +103,6 @@ Keep it concise, 2-3 sentences max, in structured format, email/text friendly.
             f.write(f"Name: {entry['name']}\n")
             f.write(f"Age: {entry['age']}\n")
             f.write(f"Medical History: {entry['medical_history']}\n")
-            f.write(f"Frame ID: {entry['frame_id']}, BBox: {entry['bbox']}\n")
             f.write(f"Description:\n{entry['description']}\n")
             f.write("="*50 + "\n")
 
